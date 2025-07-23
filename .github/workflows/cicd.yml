@@ -81,9 +81,11 @@ jobs:
       - name: Change entry.sh permission
         run: |
           chmod +x airflow/entry.sh    
-           
+          chmod +x airflow/dags/bash/*.sh
       - name: 🧪 Debug permissions
-        run: ls -l airflow/entry.sh
+        run: |
+          ls -l airflow/entry.sh
+          ls -l airflow/dags/bash/
      
       - name: "🐳 Run docker-compose on EC2"
         run: |

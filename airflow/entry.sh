@@ -34,9 +34,6 @@ else
   dvc remote modify --local "$DVC_REMOTE_NAME" secret_access_key "$AWS_SECRET_ACCESS_KEY"
 fi
 
-echo "making scripts executable..."
-chmod +x /opt/airflow/dags/bash/dvc_track_raw_data.sh
-chmod +x /opt/airflow/dags/bash/dvc_load_task.sh
 
 echo "Starting Airflow Scheduler..."
 
