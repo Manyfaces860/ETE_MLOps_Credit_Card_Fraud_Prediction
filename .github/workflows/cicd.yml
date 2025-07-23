@@ -64,6 +64,11 @@ jobs:
           docker pull $ECR_REGISTRY/app:$IMAGE_TAG
           docker pull $ECR_REGISTRY/airflow:$IMAGE_TAG
 
+      - name: 🌱 Set environment variables for Docker Compose
+        run: |
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+
       - name: "🐳 Run docker-compose on EC2"
         run: |
           docker compose -f docker-compose.deploy.yml up -d --remove-orphans
