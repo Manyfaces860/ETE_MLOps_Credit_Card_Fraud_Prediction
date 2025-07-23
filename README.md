@@ -1,39 +1,45 @@
-# 🚀 Credit Card Fraud Detection Pipeline
+# 🚀 Credit Card Fraud Detection MLOps Pipeline
 
-A robust end-to-end MLOps project to detect credit card fraud using Apache Airflow for orchestration, Prometheus + Grafana for monitoring, and FastAPI for real-time predictions. This project is containerized using Docker and uses AWS S3 for model artifact storage, DVC for data versioning, and Git for experiment tracking.
+A robust end-to-end MLOps project to detect credit card fraud using Apache Airflow for orchestration, Prometheus + Grafana for monitoring, and FastAPI for real-time predictions. This project is containerized using Docker and uses AWS S3 for model artifact storage, DVC for data versioning, and Git for experiment tracking. It is deployed on AWS EC2 using Docker Compose, with container images stored on Amazon ECR and CI/CD managed by GitHub Actions.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **MLOps Orchestration**: Apache Airflow  
-- **Model Serving**: FastAPI  
-- **Monitoring**: Prometheus, Grafana  
-- **Data Versioning**: DVC  
-- **Cloud Storage**: AWS S3  
-- **Modeling**: Scikit-learn  
-- **Infrastructure**: Docker, Docker Compose  
-- **Git Integration**: Git + GitHub
+* **MLOps Orchestration**: Apache Airflow
+* **Model Serving**: FastAPI
+* **Monitoring**: Prometheus, Grafana
+* **Data Versioning**: DVC
+* **Cloud Storage**: AWS S3
+* **Modeling**: Scikit-learn
+* **Experiment Tracking**: MLflow via DagsHub
+* **Image Registry**: Amazon ECR
+* **Infrastructure**: Docker, Docker Compose
+* **CI/CD**: GitHub Actions
+* **Cloud Compute**: AWS EC2
 
 ---
 
-## 📈 Project Overview
+## 📊 Project Overview
 
 The pipeline is structured into **two main DAGs**:
 
 ### 1️⃣ ETL DAG (`ETL.py`)
-- **Extract**: Load raw fraud transaction data.
-- **Track with DVC**: Push extracted raw data to AWS S3 using DVC.
-- **Transform**: Feature engineering (e.g., extract age/date-based features).
-- **Load**: Save and version preprocessed data and the fitted preprocessor object.
+
+* **Extract**: Load raw fraud transaction data.
+* **Track with DVC**: Push extracted raw data to AWS S3 using DVC.
+* **Transform**: Feature engineering (e.g., extract age/date-based features).
+* **Load**: Save and version preprocessed data and the fitted preprocessor object.
 
 ### 2️⃣ Training DAG (`TRAIN.py`)
-- **Drift Detection**: Compares incoming data with reference to detect feature drift.
-- **Conditional Training**:
-  - If **drift is detected**: ❌ Training is **not** triggered.
-  - If **no drift detected**: ✅ Model training proceeds.
-- **Model Training**: Train fraud detection model.
-- **Evaluation & Push**: Evaluate model and push artifacts (model + preprocessor) to S3.
+
+* **Drift Detection**: Compares incoming data with reference to detect feature drift.
+* **Conditional Training**:
+
+  * If **drift is detected**: ❌ Training is **not** triggered.
+  * If **no drift detected**: ✅ Model training proceeds.
+* **Model Training**: Train fraud detection model.
+* **Evaluation & Push**: Evaluate model and push artifacts (model + preprocessor) to S3.
 
 ---
 
@@ -41,28 +47,33 @@ The pipeline is structured into **two main DAGs**:
 
 This project integrates **Prometheus and Grafana**:
 
-- Prometheus scrapes metrics from FastAPI via `/metrics` exposed using `prometheus_fastapi_instrumentator`.
-- Grafana displays metrics dashboards via:
-  - `datasources.yml` – Prometheus config
-  - `dashboards.json` – Predefined dashboard panel for request stats, latency, etc.
+* Prometheus scrapes metrics from FastAPI via `/metrics` exposed using `prometheus_fastapi_instrumentator`.
+* Grafana displays metrics dashboards via:
+
+  * `datasources.yml` – Prometheus config
+  * `grafana_dash.json` – Predefined dashboard panel for request stats, latency, etc.
 
 ---
 
 ## 🌐 Application Behavior
 
 ### `app.py` (FastAPI Server)
-- On startup:
-  - Downloads model and preprocessor from S3 (if not already present).
-- On POST request from web UI:
-  - Preprocesses user input using the pipeline.
-  - Makes predictions using the trained model.
-  - Renders prediction result in a form using `Jinja2Templates`.
+
+* On startup:
+
+  * Downloads model and preprocessor from S3 (if not already present).
+
+* On POST request from web UI:
+
+  * Preprocesses user input using the pipeline.
+  * Makes predictions using the trained model.
+  * Renders prediction result in a form using `Jinja2Templates`.
 
 ---
 
-## 🗂️ Project Structure
+## 📂 Project Structure
 
-``` text
+```text
 .
 ├── .dvc
 ├── airflow
@@ -157,20 +168,113 @@ This project integrates **Prometheus and Grafana**:
 └── uv.lock
 
 ```
+
 ---
 
-## ⚙️ How to Run Locally
+## 🔄 Experiment Tracking with MLflow (via DagsHub)
+
+This project uses **DagsHub integrated with MLflow** to track and visualize experiments:
+
+* MLflow logs are automatically pushed to DagsHub's MLflow dashboard.
+* Each training run logs:
+
+  * Parameters
+  * Metrics
+  * Artifacts (model, preprocessor)
+
+
+> View Experiments on DagsHub: `https://dagshub.com/<your-username>/<your-repo>/experiments`
+
+---
+
+## 🚢 Deployment Overview
+
+The system is fully production-ready and runs on AWS EC2.
+
+### 🏐 GitHub Actions (CI/CD)
+
+* Triggered on push to `main`
+* Builds Docker images for all services (Airflow, FastAPI, etc.)
+* Pushes them to **Amazon ECR**
+* SSH into EC2 to pull and restart containers using `docker-compose`
+
+### 📁 Amazon ECR
+
+Stores Docker images for:
+
+* Airflow
+* FastAPI
+* Prometheus
+* Grafana
+
+### 🌎 AWS EC2
+
+Runs the full MLOps stack using `docker-compose` with port exposure for:
+
+* Airflow: `http://<ec2-ip>:8080`
+* FastAPI: `http://<ec2-ip>:8000`
+* Grafana: `http://<ec2-ip>:3000`
+
+---
+
+## 🚲 Deployment Architecture
+
+```
++-------------+       Push to main       +---------------------+
+| Developer   |  --------------------->  | GitHub Actions CI/CD|
++-------------+                          +---------------------+
+                                                  |
+                                                  | Builds Docker image
+                                                  v
+                                        +----------------------+
+                                        | Amazon ECR (Docker)  |
+                                        +----------------------+
+                                                  |
+                                                  | SSH + Pull + Restart
+                                                  v
+                                     +-----------------------------+
+                                     | AWS EC2                     |
+                                     |   docker-compose up         |
+                                     +-----------------------------+
+                                                  |
+             +-------------+----------+------------+-------------+
+             |             |          |            |             |
+        Airflow       FastAPI     Prometheus    Grafana      MLflow UI (DagsHub)
+      (port 8080)    (port 8000)   (port 9090)   (port 3000)   (via web link)
+```
+
+---
+
+## ⚙️ Run Locally
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/credit-card-fraud-mlops.git
-cd credit-card-fraud-mlops
+git clone https://github.com/your-username/<repo_name>.git
+cd <repo_name>
 
-# set env.example variables
+# Set environment variables in .env
+cp example.env .env
+
 # Spin up everything
 docker compose up --build -d
 
-# Access Airflow: http://localhost:8080
-# Access FastAPI: http://localhost:8000
-# Access Grafana: http://localhost:3000
-```# ETE_MLOps_Credit_Card_Fraud_Prediction
+# Access UIs
+# Airflow:   http://localhost:8080
+# FastAPI:   http://localhost:8000
+# Grafana:   http://localhost:3000
+```
+
+---
+
+## 🛡️ Secrets Required (GitHub Actions)
+
+`AWS_ACCESS_KEY_ID`  
+`AWS_SECRET_ACCESS_KEY`
+`AIRFLOW_UID`
+`GIT_EMAIL`
+`GIT_NAME`
+`DVC_REMOTE_NAME`
+`DVC_S3_BUCKET`
+`AWS_DEFAULT_REGION`
+
+---
