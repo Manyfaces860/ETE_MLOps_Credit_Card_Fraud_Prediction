@@ -83,14 +83,13 @@ jobs:
           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> $GITHUB_ENV
           echo "AWS_REGION_NAME=${{ secrets.AWS_REGION_NAME }}" >> $GITHUB_ENV
           echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-      - name: Change entry.sh permission
+      - name: 🔍 Check file ownership
         run: |
-          chmod +x airflow/entry.sh    
-          chmod +x airflow/dags/bash/*.sh
+          whoami
+
       - name: 🧪 Debug permissions
         run: |
-          ls -l airflow/entry.sh
-          ls -l airflow/dags/bash/
+          [ -f airflow/entry.sh ] && ls -l airflow/entry.sh || echo "❌ entry.sh not found"
 
       - name: ✅ Fix permissions so Airflow can access artifacts & logs
         run: |
