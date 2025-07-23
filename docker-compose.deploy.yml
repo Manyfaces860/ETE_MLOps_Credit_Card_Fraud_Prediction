@@ -1,7 +1,7 @@
 
 services:
   app:
-    image: <ECR_REGISTRY_URI>/app:${IMAGE_TAG}
+    image: ${ECR_REGISTRY}/app:${IMAGE_TAG}
     container_name: credit_card_pred
     restart: always
     environment:
@@ -51,7 +51,7 @@ services:
   # Airflow Initialization Service
   # This service runs once to perform DB migrations and create the admin user.
   airflow-init:
-    image: <ECR_REGISTRY_URI>/airflow:${IMAGE_TAG} # Build context should be where your Dockerfile is
+    image: ${ECR_REGISTRY}/airflow:${IMAGE_TAG} # Build context should be where your Dockerfile is
     container_name: airflow_init_service
     environment:
       # Keep these environment variables, as the base image's entrypoint.sh uses them!
@@ -106,7 +106,7 @@ services:
 
   # Consolidated Airflow Service (Webserver and Scheduler)
   airflow:
-    image: <ECR_REGISTRY_URI>/airflow:${IMAGE_TAG}
+    image: ${ECR_REGISTRY}/airflow:${IMAGE_TAG}
     container_name: airflow_combined
     restart: always
     environment:
