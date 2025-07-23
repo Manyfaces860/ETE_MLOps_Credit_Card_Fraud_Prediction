@@ -57,7 +57,7 @@ services:
       # Keep these environment variables, as the base image's entrypoint.sh uses them!
       AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
-      AIRFLOW_UID: ${AIRFLOW_UID:-50000} # Read from .env, fallback to 50000
+      AIRFLOW_UID: ${AIRFLOW_UID:-1000} # Read from .env, fallback to 50000
       _AIRFLOW_DB_MIGRATE: 'true' # This triggers DB migration in the base image's entrypoint
       _AIRFLOW_WWW_USER_CREATE: 'true' # This triggers user creation
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
@@ -115,7 +115,7 @@ services:
       AIRFLOW__CORE__FERNET_KEY: Xj2rG9hZ1tY7bV8uS0kP5oN3mQ6lJ4iK2hG1fE0dC9bA8z7yX6wV5uT4s3r2q1
       AIRFLOW__CORE__EXECUTOR: LocalExecutor # Essential for this setup
       AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
-      AIRFLOW_UID: ${AIRFLOW_UID:-50000} # Read from .env, fallback to 50000
+      AIRFLOW_UID: ${AIRFLOW_UID:-1000} # Read from .env, fallback to 50000
       AIRFLOW__API_AUTH__JWT_SECRET: "dd6d0cc62e7688e1ec756e0d54e0462d"
       AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 60
       PYTHONPATH: "/opt/airflow/dags:/opt/airflow/scripts:/opt/airflow/src:/opt/airflow/custom_logs:/opt/airflow/config:/opt/airflow/artifacts"
