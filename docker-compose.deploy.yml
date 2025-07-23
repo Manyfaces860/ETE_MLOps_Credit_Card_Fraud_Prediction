@@ -136,7 +136,6 @@ services:
       - ./airflow/logs:/opt/airflow/logs
       - ./airflow/entry.sh:/opt/airflow/entry.sh # Mount the custom entrypoint script
       # Mount other project directories as needed, e.g.:
-      - ./airflow/airflow.cfg:/opt/airflow/airflow.cfg
       - ./artifacts:/opt/airflow/artifacts
       - ./src:/opt/airflow/src
       - ./config:/opt/airflow/config
