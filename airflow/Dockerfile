@@ -14,10 +14,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install apache-airflow-providers-fab
 RUN touch /opt/airflow/.project-root
 
-COPY dags/ ./dags/
-COPY logs/ ./logs/
-COPY scripts/ ./scripts/
-COPY entry.sh ./entry.sh
-COPY src/ ./src/
-COPY config/ ./config/
+COPY . .
 
