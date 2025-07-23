@@ -150,7 +150,7 @@ services:
     mem_limit: 4g # Limit memory usage to 16GB
     
     # Use the custom entrypoint script
-    command: ["bash", "-c", "chmod +x /opt/airflow/entry.sh && /opt/airflow/entry.sh"]
+    command: ["bash", "-c", "/opt/airflow/entry.sh"]
 
   prometheus:
     image: prom/prometheus

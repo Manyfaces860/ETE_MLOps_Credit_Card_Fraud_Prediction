@@ -78,7 +78,13 @@ jobs:
           echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> $GITHUB_ENV
           echo "AWS_REGION_NAME=${{ secrets.AWS_REGION_NAME }}" >> $GITHUB_ENV
           echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-
+      - name: Change entry.sh permission
+        run: |
+          chmod +x airflow/entry.sh    
+           
+      - name: 🧪 Debug permissions
+        run: ls -l airflow/entry.sh
+     
       - name: "🐳 Run docker-compose on EC2"
         run: |
           docker compose -f docker-compose.deploy.yml up -d --remove-orphans
