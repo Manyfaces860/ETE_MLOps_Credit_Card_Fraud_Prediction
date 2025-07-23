@@ -55,6 +55,7 @@ jobs:
           aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: "🔁 Login to Amazon ECR"
+        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: "📦 Pull ECR Images"
