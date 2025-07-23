@@ -91,6 +91,11 @@ jobs:
         run: |
           ls -l airflow/entry.sh
           ls -l airflow/dags/bash/
+
+      - name: ✅ Fix permissions so Airflow can access artifacts & logs
+        run: |
+          sudo chown -R 50000:0 artifacts custom_logs airflow src config
+          sudo chmod -R 775 artifacts custom_logs airflow src config
      
       - name: "🐳 Run docker-compose on EC2"
         run: |
