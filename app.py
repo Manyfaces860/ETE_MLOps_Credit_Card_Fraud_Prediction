@@ -83,9 +83,9 @@ async def predict(request: Request):
         
         status = None
         if value == 1:
-            status = "He is a Frauuuud"
+            status = "Fraud"
         else:
-            status = "You can bounce"
+            status = "Not Fraud"
 
         return templates.TemplateResponse(
             "form.html",
