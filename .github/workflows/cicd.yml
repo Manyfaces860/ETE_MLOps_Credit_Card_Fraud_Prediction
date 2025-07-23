@@ -44,6 +44,11 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: 🧹 Force clean workspace
+        run: |
+          echo "Cleaning workspace at $GITHUB_WORKSPACE"
+          sudo find $GITHUB_WORKSPACE -name "__pycache__" -type d -exec rm -rf {} +
+
       - name: "📮 Checkout Code"
         uses: actions/checkout@v3
 
