@@ -249,13 +249,14 @@ Runs the full MLOps stack using `docker-compose` with port exposure for:
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/<repo_name>.git
-cd <repo_name>
+git clone https://github.com/Manyfaces860/ETE_MLOps_Credit_Card_Fraud_Prediction.git
+cd ETE_MLOps_Credit_Card_Fraud_Prediction
 
 # Set environment variables in .env
 cp example.env .env
 
 # Spin up everything
+# set AIRFLOW_UID and give necessary permissions to airflow for successfully running airflow container
 docker compose up --build -d
 
 # Access UIs
