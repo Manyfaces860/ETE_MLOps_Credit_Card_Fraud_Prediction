@@ -130,16 +130,6 @@ services:
       # _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-docker
     ports:
       - "8080:8080"
-    volumes:
-      - ./airflow/scripts:/opt/airflow/scripts
-      - ./airflow/dags:/opt/airflow/dags
-      - ./airflow/logs:/opt/airflow/logs
-      - ./airflow/entry.sh:/opt/airflow/entry.sh # Mount the custom entrypoint script
-      # Mount other project directories as needed, e.g.:
-      - ./artifacts:/opt/airflow/artifacts
-      - ./src:/opt/airflow/src
-      - ./config:/opt/airflow/config
-      - ./custom_logs:/opt/airflow/custom_logs
       # - ./webserver_config.py:/opt/airflow/webserver_config.py
     depends_on:
       # Your main Airflow service should wait for initialization to complete
