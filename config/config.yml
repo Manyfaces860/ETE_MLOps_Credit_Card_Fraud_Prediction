@@ -1,0 +1,51 @@
+artifacts_root: artifacts
+
+
+data_ingestion:
+  dir_name: artifacts/data_ingestion
+  source_URL: https://drive.google.com/file/d/12wpt7vqKbbLcq3aKvImzCfUKP4vZD0YQ/view?usp=sharing
+  zip_file_name: fraud_data.zip
+  unzip_dir: artifacts/data_ingestion
+
+data_transformation:
+
+  dir_name: artifacts/data_transformation
+  transformed_data_dir: artifacts/data_transformation/transformed
+  preprocess_pipeline_object_dir: artifacts/data_transformation/preprocessing_object
+  transformed_data_file_name: transformed_data.csv
+  preprocess_pipeline_object_file_name: preprocessor.jbl
+
+data_drift:
+  refrence_data_path: artifacts/data_transformation/transformed/transformed_data.csv
+  transformed_data_path: artifacts/data_transformation/transformed/transformed_data.csv
+  dir_name: artifacts/drift_report
+  file_name: report.yml
+  mlflow_uri: https://dagshub.com/mynewdbdatabase/my-first-repo.mlflow/
+
+model_training:
+  dir_name: artifacts/model_training
+  training_data_path: artifacts/data_transformation/transformed/transformed_data.csv
+  trained_model_path: artifacts/model_training/model.jbl
+  train_test_ratio: 0.2
+  mlflow_uri: https://dagshub.com/mynewdbdatabase/my-first-repo.mlflow/
+  target_column: is_fraud
+
+model_eval_push:
+  expected_score: 0.5
+  preprocessor_object_path: artifacts/data_transformation/preprocessing_object/preprocessor.jbl
+  s3_bucket_name: ccfraud860
+  s3_artifact_dir: artifacts/deploy
+  s3_model_name: model.jbl
+  s3_preprocessor_name: preprocessor.jbl 
+
+prediction:
+  s3_bucket_name: ccfraud860
+  s3_artifact_dir: artifacts/deploy
+  s3_model_name: model.jbl
+  s3_preprocessor_name: preprocessor.jbl 
+  download_location: deploy
+
+
+app:
+  host: 0.0.0.0
+  port: 8080

@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+artifacts
+.env
+testing.py
+model.jbl
+preprocessor.jbl
+# Virtual environments
+.venv
+
+

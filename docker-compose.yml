@@ -1,0 +1,187 @@
+
+services:
+  app:
+    build: .
+    container_name: credit_card_pred
+    restart: always
+    environment:
+      GIT_EMAIL: ${GIT_EMAIL}  # Pass GIT_EMAIL from .env into container's env
+      GIT_NAME: ${GIT_NAME}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_KEY} # Pass AWS_SECRET_KEY from .env into container's env
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY} # Pass AWS_ACCESS_KEY from .env into container's env
+      AWS_DEFAULT_REGION: ${AWS_REGION_NAME} # Pass AWS_DEFAULT
+      DVC_REMOTE_NAME: ${DVC_REMOTE_NAME} # Pass DVC_REMOTE_NAME from .env into container's env
+      DVC_S3_BUCKET: ${DVC_S3_BUCKET} # Pass DVC_S3_BUCKET from .env into container's env
+      # If you're using a custom image that requires additional pip packages
+      # _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-docker
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./config:/app/config
+      - ./custom_logs:/app/custom_logs
+      - ./template:/app/template
+      - ./deploy:/app/deploy
+      - ./app.py:/app/app.py
+
+    networks:
+      - airflow_network
+      
+    command: ["uv", "run", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    ports:
+      - "5432:5432" # Keep if you need to access Postgres from host
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck: # IMPORTANT: Add healthcheck for airflow-init to wait for DB
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    networks:
+      - airflow_network
+    restart: always # Ensure postgres restarts if it fails
+
+  # Airflow Initialization Service
+  # This service runs once to perform DB migrations and create the admin user.
+  airflow-init:
+    build: ./airflow # Build context should be where your Dockerfile is
+    container_name: airflow_init_service
+    environment:
+      # Keep these environment variables, as the base image's entrypoint.sh uses them!
+      AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW_UID: ${AIRFLOW_UID:-50000} # Read from .env, fallback to 50000
+      _AIRFLOW_DB_MIGRATE: 'true' # This triggers DB migration in the base image's entrypoint
+      _AIRFLOW_WWW_USER_CREATE: 'true' # This triggers user creation
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+      # IMPORTANT: If you had _PIP_ADDITIONAL_REQUIREMENTS here, remove it.
+      # The init service should be lean and only do setup.
+    volumes:
+      # These volumes are crucial for the init script to find /opt/airflow/
+      # and ensure permissions are set correctly on your host's bind mounts.
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/config:/opt/airflow/config
+      - ./airflow/plugins:/opt/airflow/plugins
+      # Include other shared volumes if necessary for init script's chown
+      - ./artifacts:/opt/airflow/artifacts
+      - ./src:/opt/airflow/src
+      - ./custom_logs:/opt/airflow/custom_logs
+    user: "0:0" # Run as root for chown operations
+    entrypoint: /bin/bash # Use bash to run the custom script
+    command:
+      - -c
+      - |
+        echo "Running Airflow initialization script..."
+        if [[ -z "${AIRFLOW_UID}" ]]; then
+          echo -e "\033[1;33mWARNING!!!: AIRFLOW_UID not set in .env! Falling back to 50000. \e[0m"
+          echo "Please consider adding AIRFLOW_UID=$(id -u) to your .env file."
+          export AIRFLOW_UID=50000 # Fallback if .env is not used
+        fi
+        
+        # Create necessary Airflow directories if they don't exist
+        mkdir -p /opt/airflow/{logs,dags,plugins,config,artifacts,src,custom_logs}
+        
+        echo "Executing base image's entrypoint.sh for DB migration and user creation..."
+        # This calls the original entrypoint script from the base image.
+        # That script will read the _AIRFLOW_DB_MIGRATE and _AIRFLOW_WWW_USER_CREATE
+        # environment variables and perform the respective actions internally.
+        /entrypoint
+        
+        echo "Airflow initialization complete."
+    depends_on:
+      postgres:
+        condition: service_healthy # Wait for postgres to be ready
+    networks:
+      - airflow_network
+
+
+  # Consolidated Airflow Service (Webserver and Scheduler)
+  airflow:
+    build: ./airflow
+    container_name: airflow_combined
+    restart: always
+    environment:
+      AIRFLOW__API__SECRET_KEY: 7446670148343ecc43e20b20c885c6e2b958dfed8405f1400eee8fa047f73e7f
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+      AIRFLOW__CORE__FERNET_KEY: Xj2rG9hZ1tY7bV8uS0kP5oN3mQ6lJ4iK2hG1fE0dC9bA8z7yX6wV5uT4s3r2q1
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor # Essential for this setup
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'False'
+      AIRFLOW_UID: ${AIRFLOW_UID:-50000} # Read from .env, fallback to 50000
+      AIRFLOW__API_AUTH__JWT_SECRET: "dd6d0cc62e7688e1ec756e0d54e0462d"
+      AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 60
+      PYTHONPATH: "/opt/airflow/dags:/opt/airflow/scripts:/opt/airflow/src:/opt/airflow/custom_logs:/opt/airflow/config:/opt/airflow/artifacts"
+      GIT_EMAIL: ${GIT_EMAIL}  # Pass GIT_EMAIL from .env into container's env
+      GIT_NAME: ${GIT_NAME}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_KEY} # Pass AWS_SECRET_KEY from .env into container's env
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY} # Pass AWS_ACCESS_KEY from .env into container's env
+      AWS_DEFAULT_REGION: ${AWS_REGION_NAME} # Pass AWS_DEFAULT
+      DVC_REMOTE_NAME: ${DVC_REMOTE_NAME} # Pass DVC_REMOTE_NAME from .env into container's env
+      DVC_S3_BUCKET: ${DVC_S3_BUCKET} # Pass DVC_S3_BUCKET from .env into container's env
+      # If you're using a custom image that requires additional pip packages
+      # _PIP_ADDITIONAL_REQUIREMENTS: apache-airflow-providers-docker
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./airflow/scripts:/opt/airflow/scripts
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/entry.sh:/entry.sh # Mount the custom entrypoint script
+      # Mount other project directories as needed, e.g.:
+      - ./airflow/airflow.cfg:/opt/airflow/airflow.cfg
+      - ./artifacts:/opt/airflow/artifacts
+      - ./src:/opt/airflow/src
+      - ./config:/opt/airflow/config
+      - ./custom_logs:/opt/airflow/custom_logs
+      # - ./webserver_config.py:/opt/airflow/webserver_config.py
+    depends_on:
+      # Your main Airflow service should wait for initialization to complete
+      airflow-init:
+        condition: service_completed_successfully
+    networks:
+      - airflow_network
+    mem_limit: 4g # Limit memory usage to 16GB
+    
+    # Use the custom entrypoint script
+    command: ["bash", "-c", "chmod +x /entry.sh && /entry.sh"]
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml 
+    networks:
+      - airflow_network
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./config/dashboards.yml:/etc/grafana/provisioning/dashboards.yml
+      - ./dashboards:/etc/grafana/provisioning/dashboards         
+      - ./dashboards:/var/lib/grafana/dashboards   
+    depends_on:
+      - prometheus
+    networks:
+      - airflow_network 
+
+networks:
+  airflow_network:
+    driver: bridge
+
+volumes:
+  pg_data:
+    driver: local

@@ -1,0 +1,7 @@
+.venv
+__pychache__
+notebooks
+artifacts
+docker-compose.yml
+airflow
+.python-version

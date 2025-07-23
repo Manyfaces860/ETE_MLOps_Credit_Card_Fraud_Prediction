@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Credit Card Fraud Prediction</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+</head>
+<body>
+  <nav class="navbar navbar-light bg-light static-top">
+    <div class="container-fluid"></div>
+  </nav>
+
+  <section>
+    <div class="container">
+      <form action="/" method="post">
+        <legend>Credit Card Fraud Prediction</legend>
+
+        <div class="mb-3">
+          <label for="trans_date_trans_time">Transaction Date & Time</label>
+          <input type="datetime-local" class="form-control" id="trans_date_trans_time" name="trans_date_trans_time" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="dob">Date of Birth</label>
+          <input type="date" class="form-control" id="dob" name="dob" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="amt">Transaction Amount</label>
+          <input type="number" step="0.01" class="form-control" id="amt" name="amt" placeholder="Enter amount in USD" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="city_pop">City Population</label>
+          <input type="number" class="form-control" id="city_pop" name="city_pop" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="merch_long">Merchant Longitude</label>
+          <input type="number" step="0.0001" class="form-control" id="merch_long" name="merch_long" required>
+        </div>
+
+        <input class="btn btn-primary" type="submit" value="Predict Fraud">
+      </form>
+
+      <div class="text-center text-black mt-4">
+        <h2 class="display-6 fw-bolder">Fraud Prediction: {{ context }}</h2>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+  <script type="text/javascript">
+    $(".input").focus(function () {
+      $(this).parent().addClass("focus");
+    }).blur(function () {
+      if ($(this).val() === '') {
+        $(this).parent().removeClass("focus");
+      }
+    });
+  </script>
+</body>
+</html>
