@@ -134,7 +134,7 @@ services:
       - ./airflow/scripts:/opt/airflow/scripts
       - ./airflow/dags:/opt/airflow/dags
       - ./airflow/logs:/opt/airflow/logs
-      - ./airflow/entry.sh:/entry.sh # Mount the custom entrypoint script
+      - ./airflow/entry.sh:/opt/airflow/entry.sh # Mount the custom entrypoint script
       # Mount other project directories as needed, e.g.:
       - ./airflow/airflow.cfg:/opt/airflow/airflow.cfg
       - ./artifacts:/opt/airflow/artifacts
@@ -151,7 +151,7 @@ services:
     mem_limit: 4g # Limit memory usage to 16GB
     
     # Use the custom entrypoint script
-    command: ["bash", "-c", "chmod +x /entry.sh && /entry.sh"]
+    command: ["bash", "-c", "chmod +x /opt/airflow/entry.sh && /opt/airflow/entry.sh"]
 
   prometheus:
     image: prom/prometheus
