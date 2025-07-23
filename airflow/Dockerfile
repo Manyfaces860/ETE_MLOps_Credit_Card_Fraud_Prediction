@@ -18,7 +18,6 @@ COPY dags/ ./dags/
 COPY logs/ ./logs/
 COPY scripts/ ./scripts/
 COPY entry.sh ./entry.sh
-COPY artifacts/ ./artifacts/
 COPY src/ ./src/
 COPY config/ ./config/
-COPY custom_logs/ ./custom_logs/
+
