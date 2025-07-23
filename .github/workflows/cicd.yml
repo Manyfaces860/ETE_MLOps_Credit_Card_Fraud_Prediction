@@ -69,6 +69,15 @@ jobs:
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
           echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          echo "AIRFLOW_UID=${{ secrets.AIRFLOW_UID }}" >> $GITHUB_ENV
+          echo "GIT_EMAIL=${{ secrets.GIT_EMAIL }}" >> $GITHUB_ENV
+          echo "GIT_NAME=${{ secrets.GIT_NAME }}" >> $GITHUB_ENV
+          echo "DVC_REMOTE_NAME=${{ secrets.DVC_REMOTE_NAME }}" >> $GITHUB_ENV
+          echo "DVC_S3_BUCKET=${{ secrets.DVC_S3_BUCKET }}" >> $GITHUB_ENV
+          echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> $GITHUB_ENV
+          echo "AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }}" >> $GITHUB_ENV
+          echo "AWS_REGION_NAME=${{ secrets.AWS_REGION_NAME }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
 
       - name: "🐳 Run docker-compose on EC2"
         run: |

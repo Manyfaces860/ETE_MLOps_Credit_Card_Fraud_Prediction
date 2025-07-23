@@ -7,9 +7,9 @@ services:
     environment:
       GIT_EMAIL: ${GIT_EMAIL}  # Pass GIT_EMAIL from .env into container's env
       GIT_NAME: ${GIT_NAME}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_KEY} # Pass AWS_SECRET_KEY from .env into container's env
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY} # Pass AWS_ACCESS_KEY from .env into container's env
-      AWS_DEFAULT_REGION: ${AWS_REGION_NAME} # Pass AWS_DEFAULT
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY} # Pass AWS_SECRET_KEY from .env into container's env
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID} # Pass AWS_ACCESS_KEY from .env into container's env
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION} # Pass AWS_DEFAULT
       DVC_REMOTE_NAME: ${DVC_REMOTE_NAME} # Pass DVC_REMOTE_NAME from .env into container's env
       DVC_S3_BUCKET: ${DVC_S3_BUCKET} # Pass DVC_S3_BUCKET from .env into container's env
       # If you're using a custom image that requires additional pip packages
@@ -121,9 +121,9 @@ services:
       PYTHONPATH: "/opt/airflow/dags:/opt/airflow/scripts:/opt/airflow/src:/opt/airflow/custom_logs:/opt/airflow/config:/opt/airflow/artifacts"
       GIT_EMAIL: ${GIT_EMAIL}  # Pass GIT_EMAIL from .env into container's env
       GIT_NAME: ${GIT_NAME}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_KEY} # Pass AWS_SECRET_KEY from .env into container's env
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY} # Pass AWS_ACCESS_KEY from .env into container's env
-      AWS_DEFAULT_REGION: ${AWS_REGION_NAME} # Pass AWS_DEFAULT
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY} # Pass AWS_SECRET_KEY from .env into container's env
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID} # Pass AWS_ACCESS_KEY from .env into container's env
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION} # Pass AWS_DEFAULT
       DVC_REMOTE_NAME: ${DVC_REMOTE_NAME} # Pass DVC_REMOTE_NAME from .env into container's env
       DVC_S3_BUCKET: ${DVC_S3_BUCKET} # Pass DVC_S3_BUCKET from .env into container's env
       # If you're using a custom image that requires additional pip packages
