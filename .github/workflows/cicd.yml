@@ -94,6 +94,7 @@ jobs:
 
       - name: ✅ Fix permissions so Airflow can access artifacts & logs
         run: |
+          mkdir -p artifacts
           sudo chown -R 50000:0 artifacts custom_logs airflow src config
           sudo chmod -R 775 artifacts custom_logs airflow src config
      
